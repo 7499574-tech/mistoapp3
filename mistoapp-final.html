@@ -1,0 +1,1001 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="theme-color" content="#6C63FF">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="МістоАПП">
+<link rel="manifest" href="/manifest.json">
+<link rel="apple-touch-icon" href="/icons/icon-192.png">
+<title>МістоАПП</title>
+<link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@300;400;600;800&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+
+  :root {
+    --bg: #0A0A0F;
+    --surface: #13131A;
+    --card: #1C1C26;
+    --border: rgba(255,255,255,0.07);
+    --text: #F0F0F5;
+    --text2: rgba(240,240,245,0.45);
+    --accent: #6C63FF;
+    --accent2: #FF6B6B;
+    --accent3: #43E97B;
+    --glow: rgba(108,99,255,0.15);
+  }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Inter', sans-serif;
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    padding: 0;
+  }
+
+  .phone {
+    width: 100%;
+    max-width: 390px;
+    min-height: 100vh;
+    background: var(--bg);
+    position: relative;
+    overflow: hidden;
+  }
+
+  /* SCREENS */
+  .screen { display: none; flex-direction: column; min-height: 100vh; }
+  .screen.active { display: flex; }
+
+  /* ===== HOME SCREEN ===== */
+  .home-header {
+    padding: 44px 24px 0;
+    position: relative;
+  }
+
+  .home-header::before {
+    content: '';
+    position: absolute;
+    top: -100px; left: -100px;
+    width: 400px; height: 400px;
+    background: radial-gradient(circle, rgba(108,99,255,0.12) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .greeting {
+    font-family: 'Unbounded', sans-serif;
+    font-size: 10px;
+    font-weight: 300;
+    color: var(--text2);
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    margin-bottom: 4px;
+  }
+
+  .location-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 14px;
+  }
+
+  .location-dot {
+    width: 7px; height: 7px;
+    background: var(--accent3);
+    border-radius: 50%;
+    box-shadow: 0 0 10px var(--accent3);
+    animation: pulse 2s infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.6; transform: scale(1.3); }
+  }
+
+  .location-name {
+    font-family: 'Unbounded', sans-serif;
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--text);
+  }
+
+  /* AI PROMPT BAR */
+  .ai-bar {
+    margin: 0 24px 14px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 12px 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    cursor: pointer;
+    transition: all 0.2s;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .ai-bar::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, rgba(108,99,255,0.08), transparent);
+    pointer-events: none;
+  }
+
+  .ai-bar:active { transform: scale(0.98); }
+
+  .ai-icon {
+    width: 32px; height: 32px;
+    background: linear-gradient(135deg, var(--accent), #9B59B6);
+    border-radius: 9px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    flex-shrink: 0;
+  }
+
+  .ai-text { flex: 1; }
+
+  .ai-text-main {
+    font-size: 13px;
+    color: var(--text2);
+    font-weight: 400;
+  }
+
+  .ai-agents {
+    display: flex;
+    gap: 5px;
+    margin-top: 4px;
+  }
+
+  .agent-chip {
+    font-size: 9px;
+    padding: 2px 7px;
+    border-radius: 20px;
+    font-weight: 500;
+    letter-spacing: 0.3px;
+  }
+
+  .agent-gemini { background: rgba(66,133,244,0.15); color: #4285F4; border: 1px solid rgba(66,133,244,0.2); }
+  .agent-claude { background: rgba(208,147,98,0.15); color: #D09362; border: 1px solid rgba(208,147,98,0.2); }
+  .agent-gpt { background: rgba(16,163,127,0.15); color: #10A37F; border: 1px solid rgba(16,163,127,0.2); }
+
+  /* SECTION LABEL */
+  .section-label {
+    padding: 0 24px 10px;
+    font-size: 10px;
+    font-weight: 500;
+    color: var(--text2);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+  }
+
+  /* MAIN GRID */
+  .main-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    padding: 0 24px;
+  }
+
+  .grid-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 14px 14px;
+    cursor: pointer;
+    transition: all 0.2s;
+    position: relative;
+    overflow: hidden;
+    min-height: 86px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+  }
+
+  .grid-card:active { transform: scale(0.96); }
+
+  .grid-card::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    transition: opacity 0.2s;
+  }
+
+  .grid-card:active::after { opacity: 1; }
+
+  .grid-card.food::after { background: radial-gradient(circle at 30% 30%, rgba(255,107,107,0.15), transparent); }
+  .grid-card.transport::after { background: radial-gradient(circle at 30% 30%, rgba(108,99,255,0.15), transparent); }
+  .grid-card.health::after { background: radial-gradient(circle at 30% 30%, rgba(67,233,123,0.15), transparent); }
+  .grid-card.events::after { background: radial-gradient(circle at 30% 30%, rgba(255,195,0,0.15), transparent); }
+  .grid-card.shop::after { background: radial-gradient(circle at 30% 30%, rgba(255,107,107,0.15), transparent); }
+  .grid-card.news::after { background: radial-gradient(circle at 30% 30%, rgba(108,99,255,0.15), transparent); }
+  .grid-card.home::after { background: radial-gradient(circle at 30% 30%, rgba(67,233,123,0.15), transparent); }
+  .grid-card.beauty::after { background: radial-gradient(circle at 30% 30%, rgba(255,195,0,0.15), transparent); }
+  .grid-card.repair::after { background: radial-gradient(circle at 30% 30%, rgba(255,107,107,0.15), transparent); }
+  .grid-card.protect::after { background: radial-gradient(circle at 30% 30%, rgba(108,99,255,0.15), transparent); }
+
+  .card-icon {
+    font-size: 26px;
+    line-height: 1;
+    margin-bottom: 8px;
+  }
+
+  .card-title {
+    font-family: 'Unbounded', sans-serif;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 2px;
+  }
+
+  .card-sub {
+    font-size: 10px;
+    color: var(--text2);
+    line-height: 1.3;
+  }
+
+  .card-arrow {
+    position: absolute;
+    top: 16px; right: 16px;
+    color: var(--text2);
+    font-size: 14px;
+  }
+
+  /* WIDE CARD */
+  .grid-card.wide {
+    grid-column: 1 / -1;
+    flex-direction: row;
+    align-items: center;
+    min-height: auto;
+    padding: 18px 20px;
+    gap: 16px;
+  }
+
+  .grid-card.wide .card-icon { margin-bottom: 0; font-size: 36px; }
+
+  .wide-content { flex: 1; }
+
+  /* BOTTOM NAV */
+  .bottom-nav {
+    position: fixed;
+    bottom: 0; left: 50%;
+    transform: translateX(-50%);
+    width: 100%;
+    max-width: 390px;
+    background: rgba(10,10,15,0.95);
+    backdrop-filter: blur(20px);
+    border-top: 1px solid var(--border);
+    display: flex;
+    padding: 12px 0 28px;
+  }
+
+  .nav-item {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    cursor: pointer;
+    padding: 6px 0;
+    transition: all 0.2s;
+  }
+
+  .nav-icon { font-size: 22px; }
+  .nav-label { font-size: 10px; color: var(--text2); font-weight: 500; letter-spacing: 0.5px; }
+  .nav-item.active .nav-label { color: var(--accent); }
+  .nav-item.active .nav-icon { filter: drop-shadow(0 0 8px var(--accent)); }
+
+  /* ===== AI SCREEN ===== */
+  .ai-screen-header {
+    padding: 56px 24px 24px;
+    background: linear-gradient(180deg, rgba(108,99,255,0.08) 0%, transparent 100%);
+  }
+
+  .ai-screen-title {
+    font-family: 'Unbounded', sans-serif;
+    font-size: 20px;
+    font-weight: 600;
+    margin-bottom: 6px;
+  }
+
+  .ai-screen-sub {
+    font-size: 13px;
+    color: var(--text2);
+  }
+
+  /* AGENT SELECTOR */
+  .agent-selector {
+    display: flex;
+    gap: 10px;
+    padding: 0 24px 24px;
+  }
+
+  .agent-btn {
+    flex: 1;
+    padding: 12px 8px;
+    border-radius: 14px;
+    border: 1px solid var(--border);
+    background: var(--card);
+    cursor: pointer;
+    text-align: center;
+    transition: all 0.2s;
+  }
+
+  .agent-btn.selected {
+    border-color: var(--accent);
+    background: rgba(108,99,255,0.1);
+  }
+
+  .agent-btn-icon { font-size: 20px; margin-bottom: 4px; }
+  .agent-btn-name { font-size: 11px; color: var(--text2); font-weight: 500; }
+  .agent-btn.selected .agent-btn-name { color: var(--accent); }
+
+  /* QUICK PROMPTS */
+  .prompts-list {
+    padding: 0 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    flex: 1;
+    overflow-y: auto;
+    padding-bottom: 100px;
+  }
+
+  .prompt-category {
+    font-size: 11px;
+    color: var(--text2);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin: 8px 0 4px;
+  }
+
+  .prompt-btn {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 14px 16px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    transition: all 0.2s;
+  }
+
+  .prompt-btn:active { transform: scale(0.98); background: rgba(108,99,255,0.1); }
+
+  .prompt-emoji { font-size: 22px; flex-shrink: 0; }
+  .prompt-text { flex: 1; font-size: 13px; color: var(--text); line-height: 1.4; }
+  .prompt-arrow { color: var(--text2); font-size: 14px; }
+
+  /* AI RESPONSE MODAL */
+  .ai-modal {
+    position: fixed;
+    inset: 0;
+    background: #0A0A0F;
+    display: none;
+    flex-direction: column;
+    z-index: 200;
+    overflow-y: auto;
+  }
+
+  .ai-modal.open { display: flex; }
+
+  .ai-modal-header {
+    padding: 56px 24px 20px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .ai-modal-back {
+    width: 36px; height: 36px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 16px;
+  }
+
+  .ai-modal-title {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text2);
+    flex: 1;
+  }
+
+  .ai-modal-body {
+    flex: 1;
+    padding: 0 24px;
+    overflow-y: auto;
+  }
+
+  .ai-thinking {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 20px 0;
+  }
+
+  .thinking-dots {
+    display: flex;
+    gap: 6px;
+  }
+
+  .thinking-dot {
+    width: 8px; height: 8px;
+    background: var(--accent);
+    border-radius: 50%;
+    animation: thinking 1.2s infinite;
+  }
+
+  .thinking-dot:nth-child(2) { animation-delay: 0.2s; }
+  .thinking-dot:nth-child(3) { animation-delay: 0.4s; }
+
+  @keyframes thinking {
+    0%, 100% { opacity: 0.3; transform: translateY(0); }
+    50% { opacity: 1; transform: translateY(-4px); }
+  }
+
+  .ai-response {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 18px;
+    padding: 20px;
+    margin: 8px 0 20px;
+    line-height: 1.7;
+    font-size: 14px;
+    color: var(--text);
+    animation: fadeIn 0.4s ease;
+  }
+
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+  .ai-response strong { color: var(--accent3); }
+
+  .result-cards {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 16px;
+  }
+
+  .result-card {
+    background: rgba(255,255,255,0.04);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 14px 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .result-card:active { background: rgba(108,99,255,0.1); }
+
+  .result-icon { font-size: 24px; }
+  .result-name { font-size: 13px; font-weight: 600; }
+  .result-info { font-size: 11px; color: var(--text2); margin-top: 2px; }
+  .result-dist { font-size: 11px; color: var(--accent3); font-weight: 500; }
+
+  .news-tab-btn {
+    padding: 8px 16px;
+    border-radius: 20px;
+    border: 1px solid var(--border);
+    background: var(--card);
+    color: var(--text2);
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: all 0.2s;
+  }
+  .news-tab-btn.active {
+    background: var(--accent);
+    color: white;
+    border-color: var(--accent);
+  }
+
+  .news-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 16px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .news-card:active { transform: scale(0.98); }
+  .news-source { font-size: 10px; color: var(--accent); font-weight: 600; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 6px; display:flex; align-items:center; gap:6px; }
+  .news-headline { font-size: 14px; color: var(--text); line-height: 1.5; margin-bottom: 6px; }
+  .news-time { font-size: 11px; color: var(--text2); }
+</style>
+</head>
+<body>
+<div class="phone">
+
+  <!-- ===== ГОЛОВНИЙ ЕКРАН ===== -->
+  <div class="screen active" id="screen-home">
+    <div class="home-header">
+      <div class="greeting">Де ти зараз</div>
+      <div class="location-row">
+        <div class="location-dot"></div>
+        <div class="location-name">Канів</div>
+      </div>
+    </div>
+
+    <!-- AI BAR -->
+    <div class="ai-bar" onclick="showScreen('screen-ai')">
+      <div class="ai-icon">✦</div>
+      <div class="ai-text">
+        <div class="ai-text-main">Запитай ШІ про що завгодно...</div>
+        <div class="ai-agents">
+          <span class="agent-chip agent-gemini">Gemini</span>
+          <span class="agent-chip agent-claude">Claude</span>
+          <span class="agent-chip agent-gpt">GPT</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="section-label">Що тобі потрібно</div>
+
+    <!-- GRID -->
+    <div class="main-grid">
+
+      <div class="grid-card food" onclick="openPrompt('🍽️ Їжа', 'Знайди де поїсти або замовити їжу поряд зі мною зараз. Геолокація: Канів, Україна.')">
+        <div class="card-arrow">›</div>
+        <div class="card-icon">🍽️</div>
+        <div>
+          <div class="card-title">Їжа</div>
+          <div class="card-sub">Поїсти · Замовити</div>
+        </div>
+      </div>
+
+      <div class="grid-card transport" onclick="openPrompt('🚕 Транспорт', 'Як дістатись куди мені потрібно? Геолокація: Канів. Покажи варіанти: таксі, автобус, маршрутка.')">
+        <div class="card-arrow">›</div>
+        <div class="card-icon">🚕</div>
+        <div>
+          <div class="card-title">Транспорт</div>
+          <div class="card-sub">Таксі · Маршрут</div>
+        </div>
+      </div>
+
+      <div class="grid-card health" onclick="openPrompt('🏥 Медицина', 'Знайди лікаря або аптеку поряд зі мною. Геолокація: Канів, Україна.')">
+        <div class="card-arrow">›</div>
+        <div class="card-icon">🏥</div>
+        <div>
+          <div class="card-title">Медицина</div>
+          <div class="card-sub">Лікар · Аптека</div>
+        </div>
+      </div>
+
+      <div class="grid-card events" onclick="openPrompt('🎭 Афіша', 'Що відбувається в Каневі сьогодні та цього тижня? Події, концерти, виставки.')">
+        <div class="card-arrow">›</div>
+        <div class="card-icon">🎭</div>
+        <div>
+          <div class="card-title">Афіша</div>
+          <div class="card-sub">Події · Квитки</div>
+        </div>
+      </div>
+
+      <div class="grid-card shop" onclick="openPrompt('🛒 Купити', 'Знайди магазини поряд: продукти, одяг, техніка. Геолокація: Канів.')">
+        <div class="card-arrow">›</div>
+        <div class="card-icon">🛒</div>
+        <div>
+          <div class="card-title">Купити</div>
+          <div class="card-sub">Магазини · Ринок</div>
+        </div>
+      </div>
+
+      <div class="grid-card home" onclick="openPrompt('🏠 Житло', 'Допоможи знайти житло поряд: оренда квартири або готель. Геолокація: Канів.')">
+        <div class="card-arrow">›</div>
+        <div class="card-icon">🏠</div>
+        <div>
+          <div class="card-title">Житло</div>
+          <div class="card-sub">Оренда · Готель</div>
+        </div>
+      </div>
+
+      <div class="grid-card beauty" onclick="openPrompt('💇 Краса', 'Знайди перукаря, салон або майстра краси поряд зі мною. Геолокація: Канів.')">
+        <div class="card-arrow">›</div>
+        <div class="card-icon">💇</div>
+        <div>
+          <div class="card-title">Краса</div>
+          <div class="card-sub">Перукар · Салон</div>
+        </div>
+      </div>
+
+      <div class="grid-card repair" onclick="openPrompt('🔧 Ремонт', 'Знайди майстра для ремонту поряд: сантехнік, електрик, будівельник. Геолокація: Канів.')">
+        <div class="card-arrow">›</div>
+        <div class="card-icon">🔧</div>
+        <div>
+          <div class="card-title">Ремонт</div>
+          <div class="card-sub">Майстер · Електрик</div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ЗАХИСТ — широкий червоний -->
+    <div style="padding: 8px 24px 0" onclick="openPrompt('🛡️ Захист', 'Мені потрібна термінова допомога: поліція, юрист або страховка. Геолокація: Канів.')">
+      <div style="
+        background: linear-gradient(135deg, rgba(239,68,68,0.2), rgba(220,38,38,0.1));
+        border: 1px solid rgba(239,68,68,0.4);
+        border-radius: 16px;
+        padding: 14px 20px;
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        cursor: pointer;
+        transition: all 0.2s;
+        position: relative;
+        overflow: hidden;
+      ">
+        <div style="position:absolute;inset:0;background:radial-gradient(circle at 10% 50%, rgba(239,68,68,0.15), transparent);pointer-events:none"></div>
+        <div style="font-size:28px">🛡️</div>
+        <div style="flex:1">
+          <div style="font-family:'Unbounded',sans-serif;font-size:13px;font-weight:600;color:#FF6B6B;margin-bottom:2px">Захист</div>
+          <div style="font-size:11px;color:rgba(255,107,107,0.7)">Поліція · Юрист · Страховка · Екстрена допомога</div>
+        </div>
+        <div style="color:rgba(255,107,107,0.6);font-size:20px">›</div>
+      </div>
+    </div>
+
+    <div style="height:90px"></div>
+  </div>
+
+  <!-- ===== ШІ ЕКРАН ===== -->
+  <div class="screen" id="screen-ai">
+    <div class="ai-screen-header">
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px">
+        <div class="ai-modal-back" onclick="showScreen('screen-home')">←</div>
+        <div>
+          <div class="ai-screen-title">✦ ШІ Помічник</div>
+          <div class="ai-screen-sub">Обери агента і постав питання</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- AGENT SELECTOR -->
+    <div class="agent-selector">
+      <div class="agent-btn selected" onclick="selectAgent(this,'Gemini')">
+        <div class="agent-btn-icon">🔵</div>
+        <div class="agent-btn-name">Gemini</div>
+      </div>
+      <div class="agent-btn" onclick="selectAgent(this,'Claude')">
+        <div class="agent-btn-icon">🟠</div>
+        <div class="agent-btn-name">Claude</div>
+      </div>
+      <div class="agent-btn" onclick="selectAgent(this,'ChatGPT')">
+        <div class="agent-btn-icon">🟢</div>
+        <div class="agent-btn-name">ChatGPT</div>
+      </div>
+    </div>
+
+    <!-- QUICK PROMPTS -->
+    <div class="prompts-list">
+      <div class="prompt-category">🍽️ Їжа</div>
+      <div class="prompt-btn" onclick="openPrompt('🍽️ Їжа поряд', 'Знайди кафе або ресторан поряд зі мною зараз. Геолокація: Канів.')">
+        <div class="prompt-emoji">🍽️</div>
+        <div class="prompt-text">Де поїсти поряд?</div>
+        <div class="prompt-arrow">›</div>
+      </div>
+      <div class="prompt-btn" onclick="openPrompt('🛒 Продукти', 'Де купити продукти поряд зі мною? Геолокація: Канів.')">
+        <div class="prompt-emoji">🛒</div>
+        <div class="prompt-text">Де купити продукти?</div>
+        <div class="prompt-arrow">›</div>
+      </div>
+
+      <div class="prompt-category">🚕 Транспорт</div>
+      <div class="prompt-btn" onclick="openPrompt('🚕 Таксі', 'Виклич таксі або покажи варіанти таксі поряд. Геолокація: Канів.')">
+        <div class="prompt-emoji">🚕</div>
+        <div class="prompt-text">Викликати таксі</div>
+        <div class="prompt-arrow">›</div>
+      </div>
+      <div class="prompt-btn" onclick="openPrompt('🚌 Маршрут', 'Як доїхати громадським транспортом? Геолокація: Канів.')">
+        <div class="prompt-emoji">🚌</div>
+        <div class="prompt-text">Знайти маршрут</div>
+        <div class="prompt-arrow">›</div>
+      </div>
+
+      <div class="prompt-category">🏥 Медицина</div>
+      <div class="prompt-btn" onclick="openPrompt('🏥 Лікар', 'Знайди лікаря або клініку поряд. Геолокація: Канів.')">
+        <div class="prompt-emoji">🏥</div>
+        <div class="prompt-text">Знайти лікаря</div>
+        <div class="prompt-arrow">›</div>
+      </div>
+      <div class="prompt-btn" onclick="openPrompt('💊 Аптека', 'Де найближча аптека? Геолокація: Канів.')">
+        <div class="prompt-emoji">💊</div>
+        <div class="prompt-text">Найближча аптека</div>
+        <div class="prompt-arrow">›</div>
+      </div>
+
+      <div class="prompt-category">🎭 Дозвілля</div>
+      <div class="prompt-btn" onclick="openPrompt('🎭 Афіша', 'Що відбувається в Каневі сьогодні та цього тижня?')">
+        <div class="prompt-emoji">🎭</div>
+        <div class="prompt-text">Що відбувається сьогодні?</div>
+        <div class="prompt-arrow">›</div>
+      </div>
+    </div>
+    <div class="spacer"></div>
+  </div>
+
+  <!-- ===== НОВИНИ ЕКРАН ===== -->
+  <div class="screen" id="screen-news">
+    <div class="ai-screen-header">
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px">
+        <div class="ai-modal-back" onclick="showScreen('screen-home');setNavById('nav-home')">←</div>
+        <div>
+          <div class="ai-screen-title">📰 Новини</div>
+          <div class="ai-screen-sub">Канів · Черкаси · Україна · Світ</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TABS -->
+    <div style="display:flex;gap:8px;padding:0 24px 16px;overflow-x:auto;scrollbar-width:none">
+      <div class="news-tab-btn active" onclick="switchNewsTab('all',this)">🌐 Всі</div>
+      <div class="news-tab-btn" onclick="switchNewsTab('local',this)">📍 Канів</div>
+      <div class="news-tab-btn" onclick="switchNewsTab('region',this)">🏙️ Черкаси</div>
+      <div class="news-tab-btn" onclick="switchNewsTab('ukraine',this)">🇺🇦 Україна</div>
+      <div class="news-tab-btn" onclick="switchNewsTab('world',this)">🌍 Світ</div>
+    </div>
+
+    <!-- NEWS LIST -->
+    <div id="news-list" style="padding:0 24px;display:flex;flex-direction:column;gap:10px;overflow-y:auto;padding-bottom:100px"></div>
+  </div>
+
+  <!-- BOTTOM NAV -->
+  <div class="bottom-nav">
+    <div class="nav-item active" id="nav-home" onclick="showScreen('screen-home'); setNav(this)">
+      <div class="nav-icon">⊞</div>
+      <div class="nav-label">Головна</div>
+    </div>
+    <div class="nav-item" onclick="showScreen('screen-ai'); setNav(this)">
+      <div class="nav-icon">✦</div>
+      <div class="nav-label">ШІ</div>
+    </div>
+    <div class="nav-item" onclick="showScreen('screen-news'); setNav(this); renderNews('all')">
+      <div class="nav-icon">📰</div>
+      <div class="nav-label">Новини</div>
+    </div>
+    <div class="nav-item" onclick="setNav(this)">
+      <div class="nav-icon">◎</div>
+      <div class="nav-label">Профіль</div>
+    </div>
+  </div>
+
+  <!-- AI RESPONSE MODAL -->
+  <div class="ai-modal" id="ai-modal">
+    <div class="ai-modal-header">
+      <div class="ai-modal-back" onclick="closeModal()">←</div>
+      <div class="ai-modal-title" id="modal-title">ШІ відповідає...</div>
+      <div style="font-size:11px;color:var(--text2)" id="modal-agent">Gemini</div>
+    </div>
+    <div class="ai-modal-body" id="modal-body">
+      <div class="ai-thinking">
+        <div class="thinking-dots">
+          <div class="thinking-dot"></div>
+          <div class="thinking-dot"></div>
+          <div class="thinking-dot"></div>
+        </div>
+        <div style="font-size:13px;color:var(--text2)">ШІ шукає для тебе...</div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+const newsData = {
+  local: [
+    { source:'📍 Kanos', text:'У Каневі відремонтують дорогу на вул. Шевченка до кінця квітня', time:'30 хв тому', url:'http://kanos.com.ua' },
+    { source:'📍 Міськрада', text:'Канівська громада отримала 4 нових генератори від міста-побратима', time:'2 год тому', url:'https://kaniv-rada.gov.ua' },
+    { source:'📍 Kanos', text:'29 безпритульних собак стерилізували у Канівській громаді', time:'5 год тому', url:'http://kanos.com.ua' },
+    { source:'📍 Kaniv.net', text:'Оголошення про збори мешканців вул. Незалежності', time:'вчора', url:'https://www.kaniv.net' },
+  ],
+  region: [
+    { source:'🏙️ Черкаси сьогодні', text:'У Черкасах відкрили нову лінію швидкісного транспорту', time:'1 год тому', url:'https://suspilne.media' },
+    { source:'🏙️ Суспільне Черкаси', text:'Черкаська ОВА звітує про відновлення інфраструктури', time:'3 год тому', url:'https://suspilne.media' },
+    { source:'🏙️ 0472.ua', text:'Дорожні роботи на трасі Київ-Черкаси триватимуть до травня', time:'5 год тому', url:'https://www.0472.ua' },
+  ],
+  ukraine: [
+    { source:'🇺🇦 Укрправда', text:'Рада ухвалила держбюджет на 2026 рік у другому читанні', time:'1 год тому', url:'https://www.pravda.com.ua' },
+    { source:'🇺🇦 Суспільне', text:'Повітряна тривога оголошена у кількох областях України', time:'2 год тому', url:'https://suspilne.media' },
+    { source:'🇺🇦 TSN', text:'Курс долара та євро: що відбувається з гривнею', time:'3 год тому', url:'https://tsn.ua' },
+    { source:'🇺🇦 УНІАН', text:'МЗС викликало посла після нових заяв Москви', time:'4 год тому', url:'https://www.unian.ua' },
+    { source:'🇺🇦 Громадське', text:'Реформа охорони здоров\'я: що зміниться з 2026 року', time:'5 год тому', url:'https://hromadske.ua' },
+  ],
+  world: [
+    { source:'🌍 BBC', text:'Переговори у Женеві: сторони не дійшли згоди', time:'1 год тому', url:'https://www.bbc.com/ukrainian' },
+    { source:'🌍 Reuters', text:'ЄС схвалив новий пакет фінансової допомоги Україні', time:'2 год тому', url:'https://www.reuters.com' },
+    { source:'🌍 DW', text:'Берлін оголосив про черговий пакет зброї для ЗСУ', time:'3 год тому', url:'https://www.dw.com/uk' },
+    { source:'🌍 Euronews', text:'Саміт G7 обговорить ситуацію в Україні', time:'4 год тому', url:'https://ua.euronews.com' },
+    { source:'🌍 Al Jazeera', text:'Міжнародний суд розпочав слухання у Гаазі', time:'5 год тому', url:'https://www.aljazeera.com' },
+  ]
+};
+
+let currentNewsTab = 'all';
+
+function switchNewsTab(tab, el) {
+  currentNewsTab = tab;
+  document.querySelectorAll('.news-tab-btn').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  renderNews(tab);
+}
+
+function renderNews(tab) {
+  const list = document.getElementById('news-list');
+  let items = [];
+  if (tab === 'all') {
+    items = [
+      ...newsData.local,
+      ...newsData.region,
+      ...newsData.ukraine,
+      ...newsData.world,
+    ];
+  } else {
+    items = newsData[tab] || [];
+  }
+  list.innerHTML = items.map(n => `
+    <div class="news-card" onclick="window.open('${n.url}','_blank')">
+      <div class="news-source">${n.source}</div>
+      <div class="news-headline">${n.text}</div>
+      <div class="news-time">🕐 ${n.time} · Читати ↗</div>
+    </div>
+  `).join('');
+}
+
+function setNavById(id) {
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  const el = document.getElementById(id);
+  if (el) el.classList.add('active');
+}
+
+// Реєстрація Service Worker
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/sw.js');
+  });
+}
+
+
+
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+function setNav(el) {
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  el.classList.add('active');
+}
+
+function selectAgent(el, name) {
+  document.querySelectorAll('.agent-btn').forEach(b => b.classList.remove('selected'));
+  el.classList.add('selected');
+  selectedAgent = name;
+}
+
+const demoData = {
+  'Їжа': {
+    items: [
+      { e:'🍽️', n:'Кафе Дніпро', i:'вул. Шевченка 12 · відкрито до 22:00', d:'200м' },
+      { e:'🍕', n:'Піцерія Каравела', i:'вул. Незалежності 5 · є доставка', d:'450м' },
+      { e:'🥘', n:'Ресторан Тарас', i:'набережна · середній чек 250₴', d:'700м' },
+      { e:'🍔', n:'Бургерна Козак', i:'пл. Шевченка 3 · до 23:00', d:'350м' },
+    ]
+  },
+  'Транспорт': {
+    items: [
+      { e:'🚕', n:'Uklon', i:'орієнтовно 4 хв · від 89₴', d:'↗ Відкрити' },
+      { e:'🚕', n:'Bolt', i:'орієнтовно 6 хв · від 75₴', d:'↗ Відкрити' },
+      { e:'🚕', n:'Таксі Канів', i:'(0473) 63-11-11', d:'📞 Дзвонити' },
+      { e:'🚌', n:'Маршрутка №3', i:'до центру · кожні 20 хв', d:'3 хв пішки' },
+    ]
+  },
+  'Медицина': {
+    items: [
+      { e:'🏥', n:'Канівська лікарня', i:'вул. Успенська 15А · цілодобово', d:'600м' },
+      { e:'💊', n:'Аптека Здоров\'я', i:'вул. Шевченка 8 · до 20:00', d:'150м' },
+      { e:'💊', n:'Аптека 24/7', i:'вул. Незалежності 12 · цілодобово', d:'300м' },
+      { e:'👨‍⚕️', n:'ЦПМСД Канів', i:'запис через Helsi · 0800-218-424', d:'650м' },
+    ]
+  },
+  'Афіша': {
+    items: [
+      { e:'🏛️', n:'Тарасова гора', i:'музей · пн-нд 9:00-18:00', d:'Квитки →' },
+      { e:'🎵', n:'Концерт на набережній', i:'субота 19:00 · безкоштовно', d:'Деталі →' },
+      { e:'🎨', n:'Виставка "Рідний край"', i:'бібліотека · до кінця місяця', d:'Вхід вільний' },
+      { e:'⛪', n:'Успенський собор', i:'екскурсії · щодня 10:00-17:00', d:'Деталі →' },
+    ]
+  },
+  'Купити': {
+    items: [
+      { e:'🛒', n:'АТБ', i:'вул. Незалежності 8 · до 22:00', d:'250м' },
+      { e:'🛒', n:'Сільпо', i:'вул. Шевченка 20 · до 23:00', d:'400м' },
+      { e:'👕', n:'Ринок Центральний', i:'щодня 8:00-17:00', d:'600м' },
+      { e:'🔌', n:'Comfy', i:'вул. Київська 5 · техніка', d:'800м' },
+    ]
+  },
+  'Житло': {
+    items: [
+      { e:'🏨', n:'Готель Канів', i:'вул. Набережна 2 · від 800₴/ніч', d:'↗ Бронювати' },
+      { e:'🏠', n:'OLX Оренда', i:'квартири в Каневі від 4000₴/міс', d:'↗ Дивитись' },
+      { e:'🏠', n:'Airbnb Канів', i:'5 варіантів · від 600₴/ніч', d:'↗ Дивитись' },
+      { e:'🏡', n:'Будинки біля Дніпра', i:'оренда на вихідні · від 1500₴', d:'↗ Дивитись' },
+    ]
+  },
+  'Краса': {
+    items: [
+      { e:'💇', n:'Салон Елегія', i:'вул. Шевченка 15 · запис по тел.', d:'200м' },
+      { e:'💅', n:'Манікюр Studio', i:'вул. Козацька 3 · пн-сб 9-19', d:'350м' },
+      { e:'💆', n:'Масаж & Spa', i:'вул. Набережна 7 · за записом', d:'500м' },
+      { e:'🪒', n:'Барбершоп Козак', i:'вул. Центральна 1 · без запису', d:'400м' },
+    ]
+  },
+  'Ремонт': {
+    items: [
+      { e:'🔧', n:'Сантехнік Олег', i:'досвід 15 років · виклик за 1 год', d:'📞 Дзвонити' },
+      { e:'⚡', n:'Електрик Василь', i:'аварійний виїзд · цілодобово', d:'📞 Дзвонити' },
+      { e:'🏗️', n:'БудМайстер', i:'ремонт під ключ · безкоштовний кошторис', d:'↗ Сайт' },
+      { e:'🪟', n:'Вікна та двері', i:'заміна, встановлення · від 500₴', d:'↗ Замовити' },
+    ]
+  },
+  'Захист': {
+    items: [
+      { e:'🚔', n:'Поліція', i:'вул. Незалежності 44', d:'📞 102' },
+      { e:'🚑', n:'Швидка допомога', i:'цілодобово · безкоштовно', d:'📞 103' },
+      { e:'⚖️', n:'Юрист Петренко', i:'консультація від 200₴ · пн-пт', d:'📞 Дзвонити' },
+      { e:'🛡️', n:'Страхова Оранта', i:'вул. Шевченка 18 · всі види страхування', d:'↗ Сайт' },
+    ]
+  },
+};
+
+var selectedAgent = 'Gemini';
+
+function openPrompt(title, prompt, icon) {
+  const city = 'Канів, Черкаська область, Україна';
+  const fullPrompt = prompt + '. Місто: ' + city + '. Відповідай українською. Дай 3-4 конкретних варіанти з назвами та адресами якщо є.';
+
+  // Показуємо модал з лоадером
+  const modal = document.getElementById('ai-modal');
+  document.getElementById('modal-title').textContent = title;
+  document.getElementById('modal-content').innerHTML = '<div style="text-align:center;padding:40px"><div class="thinking-dots"><span></span><span></span><span></span></div><p style="margin-top:16px;color:var(--text2)">Шукаю інформацію...</p></div>';
+  modal.classList.add('open');
+
+  const apiKey = 'AIzaSyDUmuAiNEcMXw-wSKMhHEdxyVIw9Ii5-Ys';
+  const apiUrl = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=' + apiKey;
+
+  fetch(apiUrl, {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({contents: [{parts: [{text: fullPrompt}]}]})
+  })
+  .then(r => r.json())
+  .then(data => {
+    const text = data.candidates?.[0]?.content?.parts?.[0]?.text || 'Не вдалось отримати відповідь';
+    const formatted = text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>').replace(/\n/g, '<br>');
+    document.getElementById('modal-content').innerHTML = '<div style="line-height:1.7;font-size:15px">' + formatted + '</div>';
+  })
+  .catch(e => {
+    document.getElementById('modal-content').innerHTML = '<p style="color:red">Помилка: ' + e.message + '</p>';
+  });
+}
+
+function closeModal() {
+  document.getElementById('ai-modal').classList.remove('open');
+}
+</script>
+</body>
+</html>
