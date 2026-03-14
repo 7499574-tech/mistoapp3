@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="theme-color" content="#6C63FF">
+<title>МістоАПП</title>
+<style>
+* { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+body { background:#0A0A0F; color:#F0F0F5; font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; min-height:100vh; }
+
+#key-screen { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:#0A0A0F; z-index:9999; align-items:center; justify-content:center; padding:24px; }
+.key-box { max-width:380px; width:100%; text-align:center; }
+.key-box h2 { font-size:22px; margin-bottom:8px; }
+.key-box p { color:rgba(240,240,245,0.6); font-size:14px; line-height:1.6; margin-bottom:24px; }
+.key-box a { color:#6C63FF; }
+.key-input { width:100%; padding:14px; border-radius:12px; border:1px solid rgba(255,255,255,0.15); background:#1C1C26; color:#F0F0F5; font-size:14px; margin-bottom:12px; outline:none; }
+.key-btn { width:100%; padding:14px; border-radius:12px; background:#6C63FF; color:white; font-size:16px; font-weight:600; border:none; cursor:pointer; }
+
+#main-screen { display:none; padding:24px 16px; }
+.header { text-align:center; margin-bottom:32px; padding-top:16px; }
+.header h1 { font-size:24px; font-weight:700; color:#6C63FF; margin-bottom:4px; }
+.header p { font-size:13px; color:rgba(240,240,245,0.5); }
+
+.grid { display:grid; grid-template-columns:1fr 1fr; gap:12px; max-width:480px; margin:0 auto; }
+.card { background:#1C1C26; border:1px solid rgba(255,255,255,0.07); border-radius:16px; padding:20px 16px; text-align:center; cursor:pointer; transition:all 0.2s; }
+.card:active { transform:scale(0.95); background:#252535; }
+.card .icon { font-size:32px; margin-bottom:8px; }
+.card .name { font-size:14px; font-weight:600; }
+
+.subcats { display:none; padding:16px 0; max-width:480px; margin:0 auto; }
+.subcat-title { font-size:13px; color:rgba(240,240,245,0.5); margin-bottom:12px; padding:0 4px; }
+.subcat-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+.subcat-card { background:#252535; border:1px solid rgba(108,99,255,0.2); border-radius:12px; padding:14px 12px; text-align:center; cursor:pointer; transition:all 0.2s; }
+.subcat-card:active { transform:scale(0.95); background:#2e2e45; }
+.subcat-card .icon { font-size:24px; margin-bottom:6px; }
+.subcat-card .name { font-size:13px; font-weight:600; color:#F0F0F5; }
+.back-btn { display:flex; align-items:center; gap:8px; color:#6C63FF; font-size:14px; cursor:pointer; margin-bottom:16px; padding:0 4px; }
+.reset-btn { display:block; margin:24px auto 0; padding:10px 20px; background:transparent; border:1px solid rgba(255,255,255,0.15); border-radius:20px; color:rgba(240,240,245,0.4); font-size:12px; cursor:pointer; }
+
+#modal { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:#0A0A0F; z-index:1000; flex-direction:column; }
+#modal.open { display:flex; }
+.modal-header { display:flex; align-items:center; padding:16px; border-bottom:1px solid rgba(255,255,255,0.07); }
+.modal-back { font-size:24px; cursor:pointer; margin-right:12px; color:#6C63FF; padding:4px 8px; }
+.modal-title { font-size:16px; font-weight:600; }
+.modal-body { flex:1; overflow-y:auto; padding:20px; }
+
+.loader { text-align:center; padding:60px 20px; }
+.dots { display:flex; justify-content:center; gap:8px; }
+.dots span { width:10px; height:10px; background:#6C63FF; border-radius:50%; animation:bounce 1.2s infinite; }
+.dots span:nth-child(2) { animation-delay:0.2s; }
+.dots span:nth-child(3) { animation-delay:0.4s; }
+@keyframes bounce { 0%,80%,100%{transform:scale(0.6);opacity:0.4} 40%{transform:scale(1);opacity:1} }
+
+.response { line-height:1.8; font-size:15px; }
+.error { color:#FF6B6B; text-align:center; padding:40px 20px; }
+.card.emerg { border-color:rgba(255,80,80,0.35); }
+.card.emerg .name { color:#FF6B6B; }
+.emerg-screen { display:none; max-width:480px; margin:0 auto; padding:16px 0; }
+.emerg-back { display:flex; align-items:center; gap:8px; color:#6C63FF; font-size:14px; cursor:pointer; margin-bottom:20px; padding:0 4px; }
+.emerg-title { font-size:13px; color:rgba(240,240,245,0.5); margin-bottom:16px; padding:0 4px; }
+.emerg-btn { display:flex; align-items:center; justify-content:space-between; background:#1C1C26; border:1px solid rgba(255,255,255,0.07); border-radius:16px; padding:14px 16px; margin-bottom:10px; text-decoration:none; cursor:pointer; }
+.emerg-btn:active { background:#252535; transform:scale(0.98); }
+.emerg-left { display:flex; align-items:center; gap:14px; }
+.emerg-icon { font-size:28px; }
+.emerg-info .emerg-name { font-size:15px; font-weight:600; color:#F0F0F5; }
+.emerg-info .emerg-desc { font-size:12px; color:rgba(240,240,245,0.45); margin-top:2px; }
+.emerg-num { font-size:18px; font-weight:700; color:white; padding:8px 14px; border-radius:10px; min-width:56px; text-align:center; }
+</style>
+</head>
+<body>
+
+<div id="key-screen">
+  <div class="key-box">
+    <div style="font-size:48px;margin-bottom:16px">🔑</div>
+    <h2>МістоАПП</h2>
+    <p>Для роботи потрібен безкоштовний Gemini API ключ.<br>
+    Отримай на <a href="https://aistudio.google.com" target="_blank">aistudio.google.com</a></p>
+    <input id="key-input" class="key-input" type="text" placeholder="Встав ключ сюди...">
+    <button class="key-btn" onclick="saveKey()">Зберегти і почати</button>
+  </div>
+</div>
+
+<div id="main-screen">
+  <div class="header">
+    <h1>МістоАПП</h1>
+    <p id="city-label">Визначаю місто...</p>
+  </div>
+  <div class="grid" id="main-grid">
+    <div class="card" onclick="showSubs('food')"><div class="icon">🍽️</div><div class="name">Їжа</div></div>
+    <div class="card" onclick="showSubs('transport')"><div class="icon">🚕</div><div class="name">Транспорт</div></div>
+    <div class="card" onclick="showSubs('health')"><div class="icon">🏥</div><div class="name">Медицина</div></div>
+    <div class="card" onclick="ask('Афіша','Події в Каневі сьогодні: концерти, виставки, розваги.')"><div class="icon">🎭</div><div class="name">Афіша</div></div>
+    <div class="card" onclick="showSubs('shop')"><div class="icon">🛒</div><div class="name">Магазини</div></div>
+    <div class="card" onclick="showSubs('repair')"><div class="icon">🔧</div><div class="name">Ремонт</div></div>
+    <div class="card" onclick="showSubs('beauty')"><div class="icon">💇</div><div class="name">Краса</div></div>
+    <div class="card" onclick="ask('Житло','Оренда квартир.')"><div class="icon">🏠</div><div class="name">Житло</div></div>
+    <div class="card emerg" onclick="showEmerg()"><div class="icon">🚨</div><div class="name">Екстрені виклики</div></div>
+  </div>
+
+  <!-- Екстрені виклики -->
+  <div class="emerg-screen" id="emerg-screen">
+    <div class="emerg-back" onclick="hideEmerg()">← Назад</div>
+    <div class="emerg-title">🚨 Екстрені виклики</div>
+
+    <a class="emerg-btn" href="tel:112">
+      <div class="emerg-left">
+        <div class="emerg-icon" style="background:rgba(255,59,48,0.15);border-radius:12px;width:52px;height:52px;display:flex;align-items:center;justify-content:center;font-size:26px;">🆘</div>
+        <div class="emerg-info">
+          <div class="emerg-name">Єдина служба порятунку</div>
+          <div class="emerg-desc">Поліція · Швидка · Пожежна</div>
+        </div>
+      </div>
+      <div class="emerg-num" style="background:#FF3B30;">112</div>
+    </a>
+
+    <a class="emerg-btn" href="tel:101">
+      <div class="emerg-left">
+        <div class="emerg-icon" style="background:rgba(255,149,0,0.15);border-radius:12px;width:52px;height:52px;display:flex;align-items:center;justify-content:center;font-size:26px;">🔥</div>
+        <div class="emerg-info">
+          <div class="emerg-name">Пожежна охорона</div>
+          <div class="emerg-desc">ДСНС України</div>
+        </div>
+      </div>
+      <div class="emerg-num" style="background:#FF9500;">101</div>
+    </a>
+
+    <a class="emerg-btn" href="tel:102">
+      <div class="emerg-left">
+        <div class="emerg-icon" style="background:rgba(0,122,255,0.15);border-radius:12px;width:52px;height:52px;display:flex;align-items:center;justify-content:center;font-size:26px;">👮</div>
+        <div class="emerg-info">
+          <div class="emerg-name">Поліція</div>
+          <div class="emerg-desc">Національна поліція України</div>
+        </div>
+      </div>
+      <div class="emerg-num" style="background:#007AFF;">102</div>
+    </a>
+
+    <a class="emerg-btn" href="tel:103">
+      <div class="emerg-left">
+        <div class="emerg-icon" style="background:rgba(52,199,89,0.15);border-radius:12px;width:52px;height:52px;display:flex;align-items:center;justify-content:center;font-size:26px;">🚑</div>
+        <div class="emerg-info">
+          <div class="emerg-name">Швидка медична допомога</div>
+          <div class="emerg-desc">Екстрена медицина</div>
+        </div>
+      </div>
+      <div class="emerg-num" style="background:#34C759;">103</div>
+    </a>
+
+    <a class="emerg-btn" href="tel:104">
+      <div class="emerg-left">
+        <div class="emerg-icon" style="background:rgba(90,200,250,0.15);border-radius:12px;width:52px;height:52px;display:flex;align-items:center;justify-content:center;font-size:26px;">⚡</div>
+        <div class="emerg-info">
+          <div class="emerg-name">Аварійна газова служба</div>
+          <div class="emerg-desc">Витік газу · Аварія</div>
+        </div>
+      </div>
+      <div class="emerg-num" style="background:#5AC8FA;">104</div>
+    </a>
+
+  </div>
+
+  <!-- Підкатегорії -->
+  <div class="subcats" id="subcats">
+    <div class="back-btn" onclick="hideSubs()">← Назад</div>
+    <div class="subcat-title" id="subcat-title"></div>
+    <div class="subcat-grid" id="subcat-grid"></div>
+  </div>
+
+</div>
+
+<div id="modal">
+  <div class="modal-header">
+    <span class="modal-back" onclick="closeModal()">←</span>
+    <span class="modal-title" id="modal-title"></span>
+  </div>
+  <div class="modal-body" id="modal-body"></div>
+</div>
+
+<script>
+window.onload = function() {
+  if (localStorage.getItem('gkey')) {
+    document.getElementById('main-screen').style.display = 'block';
+    detectCity();
+  } else {
+    document.getElementById('key-screen').style.display = 'flex';
+  }
+};
+
+function saveKey() {
+  var k = document.getElementById('key-input').value.trim();
+  if (!k) return;
+  localStorage.setItem('gkey', k);
+  document.getElementById('key-screen').style.display = 'none';
+  document.getElementById('main-screen').style.display = 'block';
+  detectCity();
+}
+
+function resetKey() {
+  localStorage.removeItem('gkey');
+  document.getElementById('main-screen').style.display = 'none';
+  document.getElementById('key-screen').style.display = 'flex';
+}
+
+// Геолокація — визначаємо місто при завантаженні
+var currentCity = 'Канів';
+var currentStreet = '';
+var currentLat = null;
+var currentLon = null;
+
+function detectCity() {
+  if (!navigator.geolocation) return;
+  navigator.geolocation.getCurrentPosition(function(pos) {
+    currentLat = pos.coords.latitude;
+    currentLon = pos.coords.longitude;
+    fetch('https://nominatim.openstreetmap.org/reverse?lat='+currentLat+'&lon='+currentLon+'&format=json&accept-language=uk')
+      .then(function(r){ return r.json(); })
+      .then(function(d){
+        currentCity = d.address.city || d.address.town || d.address.village || 'Канів';
+        currentStreet = d.address.road || '';
+        var region = d.address.state || '';
+        document.getElementById('city-label').textContent = currentCity + (region ? ' · ' + region : '');
+      })
+      .catch(function(){
+        document.getElementById('city-label').textContent = currentCity;
+      });
+  }, function(){
+    document.getElementById('city-label').textContent = currentCity;
+  });
+}
+
+function ask(title, prompt) {
+  var k = localStorage.getItem('gkey');
+  if (!k) { resetKey(); return; }
+
+  // Замінюємо Канів на поточне місто в промпті
+  var localPrompt = prompt.replace(/в місті Канів/g, 'в місті ' + currentCity)
+                          .replace(/Канів/g, currentCity)
+                          .replace(/Каневі/g, currentCity);
+  // Додаємо вулицю якщо є — для точнішого пошуку
+  if (currentStreet) {
+    localPrompt = localPrompt + ' Пріоритет — місця поруч з вулицею ' + currentStreet + '.';
+  }
+
+  document.getElementById('modal-title').textContent = title;
+  var searchTexts = {
+    'Їжа': 'Шукаю найкращі кафе та ресторани поряд...',
+    'Транспорт': 'Шукаю варіанти транспорту поряд...',
+    'Медицина': 'Шукаю лікарів та аптеки поряд...',
+    'Афіша': 'Шукаю події та розваги в місті...',
+    'Магазини': 'Шукаю магазини поряд...',
+    'Ремонт': 'Шукаю майстрів для ремонту поряд...',
+    'Краса': 'Шукаю салони та перукарні поряд...',
+    'Житло': 'Шукаю варіанти житла поряд...'
+  };
+  var searchText = searchTexts[title] || 'Шукаю для тебе найкраще...';
+  document.getElementById('modal-body').innerHTML = '<div class="loader"><div class="dots"><span></span><span></span><span></span></div><p style="margin-top:16px;color:rgba(240,240,245,0.5)">' + searchText + '</p></div>';
+  document.getElementById('modal').classList.add('open');
+
+  fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=' + k, {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({
+      contents:[{parts:[{text: `Ти локальний пошуковик для міста ${currentCity}, Україна.
+${currentLat ? `Координати користувача: ${currentLat.toFixed(4)}, ${currentLon.toFixed(4)}.` : ''}
+${currentStreet ? `Вулиця: ${currentStreet}.` : ''}
+
+Запит: ${localPrompt}
+
+ПРАВИЛА — обов'язково дотримуйся:
+1. ТІЛЬКИ місця які фізично знаходяться в місті ${currentCity}, Україна
+2. ЗАБОРОНЕНО включати місця з інших міст або країн
+3. Якщо місця не знайдено в ${currentCity} — поверни порожній масив []
+4. Не вигадуй адреси і телефони — якщо не впевнений, не включай поле
+5. Відповідай ТІЛЬКИ JSON масивом, без будь-якого іншого тексту:
+[
+  {"name": "Назва місця", "address": "вулиця, номер", "phone": "+380...", "description": "коротко про місце"},
+  ...
+]`}]}],
+      tools: [{google_search: {}}]
+    })
+  })
+  .then(function(r){return r.json();})
+  .then(function(d){
+    if(d.error){
+      document.getElementById('modal-body').innerHTML = '<div class="error">Помилка: ' + d.error.message + '</div>';
+      return;
+    }
+    var t = d.candidates[0].content.parts[0].text;
+    var html = '';
+    try {
+      var clean = t.replace(/```json|```/g,'').trim();
+      var items = JSON.parse(clean);
+      items.forEach(function(item) {
+        var mapsUrl = 'https://maps.google.com/?q=' + encodeURIComponent((item.name||'') + ' ' + (item.address||'') + ' ' + currentCity);
+        html += '<div style="background:#1C1C26;border-radius:12px;padding:16px;margin-bottom:12px;">';
+        html += '<div style="font-size:16px;font-weight:600;margin-bottom:6px;">' + (item.name||'') + '</div>';
+        if(item.address) html += '<div style="color:rgba(240,240,245,0.6);font-size:13px;margin-bottom:4px;">📍 ' + item.address + '</div>';
+        if(item.phone) html += '<div style="font-size:13px;margin-bottom:8px;">📞 <a href="tel:' + item.phone + '" style="color:#6C63FF;">' + item.phone + '</a></div>';
+        if(item.description) html += '<div style="font-size:13px;color:rgba(240,240,245,0.7);margin-bottom:10px;">' + item.description + '</div>';
+        html += '<a href="' + mapsUrl + '" target="_blank" style="display:inline-block;padding:8px 16px;background:#6C63FF;border-radius:8px;color:white;font-size:13px;text-decoration:none;">🗺️ Google Maps</a>';
+        html += '</div>';
+      });
+    } catch(e) {
+      t = t.replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>').replace(/\n/g,'<br>');
+      html = '<div class="response">'+t+'</div>';
+    }
+    document.getElementById('modal-body').innerHTML = html + '<div style="text-align:center;margin-top:16px;font-size:11px;color:rgba(240,240,245,0.3);">⚠️ Перевіряйте актуальність інформації</div>';
+  })
+  .catch(function(e){
+    document.getElementById('modal-body').innerHTML = '<div class="error">Помилка: '+e.message+'</div>';
+  });
+}
+
+function showEmerg() {
+  document.getElementById('main-grid').style.display = 'none';
+  document.getElementById('emerg-screen').style.display = 'block';
+}
+function hideEmerg() {
+  document.getElementById('main-grid').style.display = 'grid';
+  document.getElementById('emerg-screen').style.display = 'none';
+}
+
+var subcategories = {
+  food: {
+    title: '🍽️ Їжа — оберіть що шукаєте',
+    items: [
+      {icon:'🍕', name:'Ресторани', prompt:'Ресторани в місті з адресами та телефонами.'},
+      {icon:'☕', name:"Кав'ярні", prompt:"Кав'ярні та кофейні в місті з адресами."},
+      {icon:'🛵', name:'Доставка', prompt:'Служби доставки їжі. Які кафе або сервіси доставляють їжу додому.'},
+      {icon:'🥗', name:'Швидка їжа', prompt:'Заклади швидкого харчування: піца, шаурма, бургери.'},
+    ]
+  },
+  transport: {
+    title: '🚕 Транспорт — оберіть тип',
+    items: [
+      {icon:'🚕', name:'Таксі', prompt:'Служби таксі в місті. Номери телефонів для виклику.'},
+      {icon:'🚌', name:'Маршрутки', prompt:'Маршрутки та автобуси в місті. Маршрути та зупинки.'},
+      {icon:'🚂', name:'Потяги', prompt:'Розклад потягів з найближчої залізничної станції.'},
+      {icon:'🚗', name:'Оренда авто', prompt:'Оренда автомобілів в місті або поряд.'},
+    ]
+  },
+  health: {
+    title: '🏥 Медицина — оберіть що шукаєте',
+    items: [
+      {icon:'💊', name:'Аптеки', prompt:'Аптеки в місті з адресами та режимом роботи.'},
+      {icon:'👨‍⚕️', name:'Лікарі', prompt:'Лікарі та приватні клініки в місті з адресами.'},
+      {icon:'🦷', name:'Стоматологія', prompt:'Стоматологічні кабінети та клініки в місті.'},
+      {icon:'🏥', name:'Лікарня', prompt:'Лікарні та швидка допомога в місті.'},
+    ]
+  },
+  shop: {
+    title: '🛒 Магазини — оберіть категорію',
+    items: [
+      {icon:'🥕', name:'Продукти', prompt:'Продуктові магазини та супермаркети в місті з адресами.'},
+      {icon:'👕', name:'Одяг', prompt:'Магазини одягу та взуття в місті.'},
+      {icon:'🔨', name:'Будматеріали', prompt:'Магазини будматеріалів та господарські магазини в місті.'},
+      {icon:'📱', name:'Техніка', prompt:'Магазини електроніки та побутової техніки в місті.'},
+    ]
+  },
+  repair: {
+    title: '🔧 Ремонт — оберіть майстра',
+    items: [
+      {icon:'🚿', name:'Сантехнік', prompt:'Сантехніки в місті. Контакти майстрів.'},
+      {icon:'⚡', name:'Електрик', prompt:'Електрики в місті. Контакти майстрів.'},
+      {icon:'🪟', name:'Вікна/двері', prompt:'Майстри з ремонту вікон та дверей в місті.'},
+      {icon:'🏗️', name:'Будівництво', prompt:'Будівельні бригади та майстри в місті.'},
+    ]
+  },
+  beauty: {
+    title: '💇 Краса — оберіть послугу',
+    items: [
+      {icon:'✂️', name:'Перукарня', prompt:'Перукарні в місті з адресами та контактами.'},
+      {icon:'💅', name:'Манікюр', prompt:'Майстри манікюру та педикюру в місті.'},
+      {icon:'💆', name:'Масаж', prompt:'Масажні кабінети в місті з адресами.'},
+      {icon:'🧖', name:'Салон краси', prompt:'Салони краси в місті з повним спектром послуг.'},
+    ]
+  }
+};
+
+function showSubs(cat) {
+  var data = subcategories[cat];
+  if (!data) return;
+  document.getElementById('main-grid').style.display = 'none';
+  document.getElementById('subcats').style.display = 'block';
+  document.getElementById('subcat-title').textContent = data.title;
+  var html = '';
+  data.items.forEach(function(item) {
+    html += `<div class="subcat-card" onclick="ask('${item.name}', '${item.prompt.replace(/'/g, "\\'")}')">`;
+    html += '<div class="icon">' + item.icon + '</div>';
+    html += '<div class="name">' + item.name + '</div>';
+    html += '</div>';
+  });
+  document.getElementById('subcat-grid').innerHTML = html;
+}
+
+function hideSubs() {
+  document.getElementById('main-grid').style.display = 'grid';
+  document.getElementById('subcats').style.display = 'none';
+}
+
+function closeModal() {
+  document.getElementById('modal').classList.remove('open');
+}
+</script>
+</body>
+</html>
