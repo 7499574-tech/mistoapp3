@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="theme-color" content="#6C63FF">
+<title>МістоАПП</title>
+<style>
+* { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+body { background:#0A0A0F; color:#F0F0F5; font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; min-height:100vh; }
+
+#key-screen { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:#0A0A0F; z-index:9999; align-items:center; justify-content:center; padding:24px; }
+.key-box { max-width:380px; width:100%; text-align:center; }
+.key-box h2 { font-size:22px; margin-bottom:8px; }
+.key-box p { color:rgba(240,240,245,0.6); font-size:14px; line-height:1.6; margin-bottom:24px; }
+.key-box a { color:#6C63FF; }
+.key-input { width:100%; padding:14px; border-radius:12px; border:1px solid rgba(255,255,255,0.15); background:#1C1C26; color:#F0F0F5; font-size:14px; margin-bottom:12px; outline:none; }
+.key-btn { width:100%; padding:14px; border-radius:12px; background:#6C63FF; color:white; font-size:16px; font-weight:600; border:none; cursor:pointer; }
+
+#main-screen { display:none; padding:24px 16px; }
+.header { text-align:center; margin-bottom:32px; padding-top:16px; }
+.header h1 { font-size:24px; font-weight:700; color:#6C63FF; margin-bottom:4px; }
+.header p { font-size:13px; color:rgba(240,240,245,0.5); }
+
+.grid { display:grid; grid-template-columns:1fr 1fr; gap:12px; max-width:480px; margin:0 auto; }
+.card { background:#1C1C26; border:1px solid rgba(255,255,255,0.07); border-radius:16px; padding:20px 16px; text-align:center; cursor:pointer; transition:all 0.2s; }
+.card:active { transform:scale(0.95); background:#252535; }
+.card .icon { font-size:32px; margin-bottom:8px; }
+.card .name { font-size:14px; font-weight:600; }
+
+.reset-btn { display:block; margin:24px auto 0; padding:10px 20px; background:transparent; border:1px solid rgba(255,255,255,0.15); border-radius:20px; color:rgba(240,240,245,0.4); font-size:12px; cursor:pointer; }
+
+#modal { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:#0A0A0F; z-index:1000; flex-direction:column; }
+#modal.open { display:flex; }
+.modal-header { display:flex; align-items:center; padding:16px; border-bottom:1px solid rgba(255,255,255,0.07); }
+.modal-back { font-size:24px; cursor:pointer; margin-right:12px; color:#6C63FF; padding:4px 8px; }
+.modal-title { font-size:16px; font-weight:600; }
+.modal-body { flex:1; overflow-y:auto; padding:20px; }
+
+.loader { text-align:center; padding:60px 20px; }
+.dots { display:flex; justify-content:center; gap:8px; }
+.dots span { width:10px; height:10px; background:#6C63FF; border-radius:50%; animation:bounce 1.2s infinite; }
+.dots span:nth-child(2) { animation-delay:0.2s; }
+.dots span:nth-child(3) { animation-delay:0.4s; }
+@keyframes bounce { 0%,80%,100%{transform:scale(0.6);opacity:0.4} 40%{transform:scale(1);opacity:1} }
+
+.response { line-height:1.8; font-size:15px; }
+.error { color:#FF6B6B; text-align:center; padding:40px 20px; }
+</style>
+</head>
+<body>
+
+<div id="key-screen">
+  <div class="key-box">
+    <div style="font-size:48px;margin-bottom:16px">🔑</div>
+    <h2>МістоАПП</h2>
+    <p>Для роботи потрібен безкоштовний Gemini API ключ.<br>
+    Отримай на <a href="https://aistudio.google.com" target="_blank">aistudio.google.com</a></p>
+    <input id="key-input" class="key-input" type="text" placeholder="Встав ключ сюди...">
+    <button class="key-btn" onclick="saveKey()">Зберегти і почати</button>
+  </div>
+</div>
+
+<div id="main-screen">
+  <div class="header">
+    <h1>МістоАПП</h1>
+    <p>Канів · Черкаська область</p>
+  </div>
+  <div class="grid">
+    <div class="card" onclick="ask('Їжа','Де поїсти в місті Канів? Назви кафе або ресторани з адресами.')"><div class="icon">🍽️</div><div class="name">Їжа</div></div>
+    <div class="card" onclick="ask('Транспорт','Транспорт в місті Канів: таксі, автобус, маршрутка.')"><div class="icon">🚕</div><div class="name">Транспорт</div></div>
+    <div class="card" onclick="ask('Медицина','Лікарі та аптеки в місті Канів. Адреси.')"><div class="icon">🏥</div><div class="name">Медицина</div></div>
+    <div class="card" onclick="ask('Афіша','Події в Каневі сьогодні: концерти, виставки.')"><div class="icon">🎭</div><div class="name">Афіша</div></div>
+    <div class="card" onclick="ask('Магазини','Магазини в місті Канів. Адреси.')"><div class="icon">🛒</div><div class="name">Магазини</div></div>
+    <div class="card" onclick="ask('Ремонт','Майстри для ремонту в місті Канів: сантехнік, електрик.')"><div class="icon">🔧</div><div class="name">Ремонт</div></div>
+    <div class="card" onclick="ask('Краса','Перукарні та салони краси в місті Канів.')"><div class="icon">💇</div><div class="name">Краса</div></div>
+    <div class="card" onclick="ask('Житло','Оренда квартир в місті Канів.')"><div class="icon">🏠</div><div class="name">Житло</div></div>
+  </div>
+  <button class="reset-btn" onclick="resetKey()">Змінити API ключ</button>
+</div>
+
+<div id="modal">
+  <div class="modal-header">
+    <span class="modal-back" onclick="closeModal()">←</span>
+    <span class="modal-title" id="modal-title"></span>
+  </div>
+  <div class="modal-body" id="modal-body"></div>
+</div>
+
+<script>
+window.onload = function() {
+  if (localStorage.getItem('gkey')) {
+    document.getElementById('main-screen').style.display = 'block';
+  } else {
+    document.getElementById('key-screen').style.display = 'flex';
+  }
+};
+
+function saveKey() {
+  var k = document.getElementById('key-input').value.trim();
+  if (!k) return;
+  localStorage.setItem('gkey', k);
+  document.getElementById('key-screen').style.display = 'none';
+  document.getElementById('main-screen').style.display = 'block';
+}
+
+function resetKey() {
+  localStorage.removeItem('gkey');
+  document.getElementById('main-screen').style.display = 'none';
+  document.getElementById('key-screen').style.display = 'flex';
+}
+
+function ask(title, prompt) {
+  var k = localStorage.getItem('gkey');
+  if (!k) { resetKey(); return; }
+
+  document.getElementById('modal-title').textContent = title;
+  document.getElementById('modal-body').innerHTML = '<div class="loader"><div class="dots"><span></span><span></span><span></span></div><p style="margin-top:16px;color:rgba(240,240,245,0.5)">Шукаю...</p></div>';
+  document.getElementById('modal').classList.add('open');
+
+  fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=' + k, {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({
+      contents:[{parts:[{text: prompt + ' Відповідай українською. Дай 3-4 варіанти з реальними адресами.'}]}],
+      tools: [{google_search: {}}]
+    })
+  })
+  .then(function(r){return r.json();})
+  .then(function(d){
+    if(d.error){
+      document.getElementById('modal-body').innerHTML = '<div class="error">Помилка: ' + d.error.message + '</div>';
+      return;
+    }
+    var t = d.candidates[0].content.parts[0].text;
+    t = t.replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>').replace(/\n/g,'<br>');
+    document.getElementById('modal-body').innerHTML = '<div class="response">'+t+'</div>';
+  })
+  .catch(function(e){
+    document.getElementById('modal-body').innerHTML = '<div class="error">Помилка: '+e.message+'</div>';
+  });
+}
+
+function closeModal() {
+  document.getElementById('modal').classList.remove('open');
+}
+</script>
+</body>
+</html>
