@@ -254,7 +254,7 @@ function showSubs(cat) {
   document.getElementById('subcat-title').textContent = data.title;
   var html = '';
   data.items.forEach(function(item) {
-    html += '<div class="subcat-card" onclick="ask('' + item.name + '','' + item.prompt.replace(/'/g,"\'") + '')">';
+    html += `<div class="subcat-card" onclick="ask('${item.name}', '${item.prompt.replace(/'/g, "\\'")}')">`;
     html += '<div class="icon">' + item.icon + '</div>';
     html += '<div class="name">' + item.name + '</div>';
     html += '</div>';
