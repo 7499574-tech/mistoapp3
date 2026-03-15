@@ -1,0 +1,89 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <!-- Glow filter for the accretion disk -->
+    <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="8" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <filter id="softglow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="14" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <!-- Radial gradient for accretion disk -->
+    <radialGradient id="diskGrad" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#0A0A0F"/>
+      <stop offset="40%" stop-color="#0A0A0F"/>
+      <stop offset="60%" stop-color="#4A3FCC" stop-opacity="0.8"/>
+      <stop offset="75%" stop-color="#6C63FF" stop-opacity="1"/>
+      <stop offset="88%" stop-color="#A89CFF" stop-opacity="0.6"/>
+      <stop offset="100%" stop-color="#0A0A0F" stop-opacity="0"/>
+    </radialGradient>
+    <!-- Outer glow gradient -->
+    <radialGradient id="outerGlow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#6C63FF" stop-opacity="0"/>
+      <stop offset="60%" stop-color="#6C63FF" stop-opacity="0"/>
+      <stop offset="80%" stop-color="#6C63FF" stop-opacity="0.15"/>
+      <stop offset="100%" stop-color="#6C63FF" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+
+  <!-- Background -->
+  <rect width="512" height="512" rx="100" fill="#0A0A0F"/>
+
+  <!-- Outer ambient glow -->
+  <circle cx="256" cy="256" r="220" fill="url(#outerGlow)"/>
+
+  <!-- Gravitational wave rings - city being pulled in -->
+  <ellipse cx="256" cy="256" rx="195" ry="40" fill="none" stroke="#6C63FF" stroke-width="1" opacity="0.12"/>
+  <ellipse cx="256" cy="256" rx="170" ry="32" fill="none" stroke="#6C63FF" stroke-width="1" opacity="0.18"/>
+  <ellipse cx="256" cy="256" rx="145" ry="25" fill="none" stroke="#6C63FF" stroke-width="1.5" opacity="0.25"/>
+
+  <!-- City buildings being pulled toward center - left side -->
+  <!-- Far left building -->
+  <rect x="42" y="235" width="28" height="55" rx="3" fill="#6C63FF" opacity="0.35" transform="rotate(-8, 56, 262)"/>
+  <!-- Left building -->
+  <rect x="82" y="215" width="34" height="75" rx="3" fill="#6C63FF" opacity="0.5" transform="rotate(-5, 99, 252)"/>
+  <!-- Left-center building -->
+  <rect x="128" y="200" width="38" height="90" rx="3" fill="#6C63FF" opacity="0.7" transform="rotate(-2, 147, 245)"/>
+
+  <!-- City buildings being pulled toward center - right side -->
+  <!-- Right-center building -->
+  <rect x="346" y="200" width="38" height="90" rx="3" fill="#6C63FF" opacity="0.7" transform="rotate(2, 365, 245)"/>
+  <!-- Right building -->
+  <rect x="396" y="215" width="34" height="75" rx="3" fill="#6C63FF" opacity="0.5" transform="rotate(5, 413, 252)"/>
+  <!-- Far right building -->
+  <rect x="442" y="235" width="28" height="55" rx="3" fill="#6C63FF" opacity="0.35" transform="rotate(8, 456, 262)"/>
+
+  <!-- Small top buildings -->
+  <rect x="105" y="155" width="22" height="45" rx="3" fill="#6C63FF" opacity="0.3" transform="rotate(-15, 116, 177)"/>
+  <rect x="385" y="155" width="22" height="45" rx="3" fill="#6C63FF" opacity="0.3" transform="rotate(15, 396, 177)"/>
+
+  <!-- Accretion disk -->
+  <circle cx="256" cy="256" r="160" fill="url(#diskGrad)" filter="url(#softglow)"/>
+
+  <!-- Bright accretion ring -->
+  <circle cx="256" cy="256" r="118" fill="none" stroke="#6C63FF" stroke-width="3" opacity="0.9" filter="url(#glow)"/>
+  <circle cx="256" cy="256" r="118" fill="none" stroke="#A89CFF" stroke-width="1" opacity="0.7"/>
+
+  <!-- Inner ring -->
+  <circle cx="256" cy="256" r="95" fill="none" stroke="#4A3FCC" stroke-width="2" opacity="0.5"/>
+
+  <!-- The black hole center -->
+  <circle cx="256" cy="256" r="85" fill="#0A0A0F"/>
+
+  <!-- МА letters hidden inside -->
+  <!-- М -->
+  <path d="M 210 285 L 210 230 L 234 260 L 258 230 L 258 285" fill="none" stroke="#6C63FF" stroke-width="7" stroke-linecap="round" stroke-linejoin="round" opacity="0.85"/>
+  <!-- А -->
+  <path d="M 268 285 L 290 230 L 312 285 M 276 263 L 304 263" fill="none" stroke="#6C63FF" stroke-width="7" stroke-linecap="round" stroke-linejoin="round" opacity="0.85"/>
+
+  <!-- Gravitational lensing effect - light streaks -->
+  <path d="M 150 180 Q 200 220 256 256" fill="none" stroke="#A89CFF" stroke-width="1.5" opacity="0.3"/>
+  <path d="M 362 180 Q 312 220 256 256" fill="none" stroke="#A89CFF" stroke-width="1.5" opacity="0.3"/>
+  <path d="M 120 300 Q 190 270 256 256" fill="none" stroke="#A89CFF" stroke-width="1" opacity="0.2"/>
+  <path d="M 392 300 Q 322 270 256 256" fill="none" stroke="#A89CFF" stroke-width="1" opacity="0.2"/>
+
+  <!-- Bright spot on accretion disk (hotspot) -->
+  <circle cx="338" cy="210" r="8" fill="#FFFFFF" opacity="0.6" filter="url(#glow)"/>
+  <circle cx="338" cy="210" r="4" fill="#FFFFFF" opacity="0.9"/>
+</svg>
